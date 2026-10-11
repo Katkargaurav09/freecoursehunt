@@ -41,6 +41,10 @@
     overflow-x: hidden;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background: var(--bg);
     color: var(--ink);
@@ -412,6 +416,87 @@
   .demo-prompt { color: var(--accent); }
   .demo-faint { color: rgba(255,255,255,0.5); }
 
+  /* For Sale section */
+  .sale-section {
+    margin-top: 80px;
+    padding: 48px;
+    border: 2px dashed var(--accent);
+    border-radius: 12px;
+    background: var(--accent-soft);
+  }
+
+  .sale-section h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .sale-section p {
+    color: var(--ink-soft);
+    max-width: 620px;
+    margin-bottom: 24px;
+  }
+
+  .sale-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 620px;
+  }
+
+  .sale-form input,
+  .sale-form textarea {
+    padding: 14px 16px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    font-family: 'Geist', sans-serif;
+    font-size: 15px;
+    background: white;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .sale-form input::placeholder,
+  .sale-form textarea::placeholder {
+    color: var(--ink-faint);
+  }
+
+  .sale-form textarea {
+    grid-column: 1 / -1;
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .sale-form button {
+    grid-column: 1 / -1;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: 'Geist', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .sale-form button:hover {
+    background: var(--accent);
+  }
+
+  .footer-sale {
+    color: var(--accent-deep);
+    text-decoration: none;
+  }
+
+  .footer-sale:hover {
+    text-decoration: underline;
+  }
+
   /* Footer */
   footer {
     padding: 48px;
@@ -502,6 +587,8 @@
     .deco-text { display: none; }
     footer { padding: 32px 24px; }
     .nav-meta { display: none; }
+    .sale-section { padding: 28px 20px; }
+    .sale-form { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -593,11 +680,32 @@
       </div>
     </div>
   </section>
+
+  <section class="sale-section" id="for-sale">
+    <div class="section-label">// Acquisition Opportunity</div>
+    <h2>This domain &amp; project are for sale.</h2>
+    <p>
+      FreeCourseHunt.in comes with this ready-made brand, design and landing page.
+      A great start for an edtech, course-discovery or coupon website. Make an offer below.
+    </p>
+    <form class="sale-form" id="offerForm">
+      <input type="text" id="offerName" placeholder="Your name" required>
+      <input type="email" id="offerEmail" placeholder="your@email.com" required>
+      <input type="text" id="offerAmount" placeholder="Your offer (₹ or $)" required>
+      <input type="text" id="offerPhone" placeholder="Phone / WhatsApp (optional)">
+      <textarea id="offerMsg" placeholder="Message (optional)"></textarea>
+      <button type="submit">Send Offer</button>
+    </form>
+    <div class="success-msg" id="offerSuccess">
+      ✓ Thanks! Your offer was received. We'll reply soon.
+    </div>
+  </section>
+
 </div>
 
 <footer>
   <div>© 2026 FreeCourseHunt — Made in India</div>
-  <div>FreeCourseHunt.in</div>
+  <div><a href="#for-sale" class="footer-sale">This domain is for sale →</a></div>
 </footer>
 
 <script>
@@ -613,7 +721,6 @@
 
     if (!email || !email.includes('@')) return;
 
-    // Disable button during submission
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending...';
 
@@ -632,11 +739,8 @@
       });
 
       if (response.ok) {
-        // Show success
         form.style.display = 'none';
         successMsg.classList.add('show');
-
-        // Track signup event in Clarity
         if (window.clarity) {
           window.clarity('event', 'email_signup');
         }
@@ -646,6 +750,49 @@
     } catch (err) {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Notify Me';
+      alert('Something went wrong. Please try again.');
+    }
+  });
+
+  // Domain offer form
+  const offerForm = document.getElementById('offerForm');
+  const offerSuccess = document.getElementById('offerSuccess');
+
+  offerForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = offerForm.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch('https://formspree.io/f/xpqbolez', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'DOMAIN OFFER',
+          name: document.getElementById('offerName').value.trim(),
+          email: document.getElementById('offerEmail').value.trim(),
+          offer: document.getElementById('offerAmount').value.trim(),
+          phone: document.getElementById('offerPhone').value.trim(),
+          message: document.getElementById('offerMsg').value.trim(),
+          source: 'freecoursehunt.in for-sale form',
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (!res.ok) throw new Error('Submission failed');
+
+      offerForm.style.display = 'none';
+      offerSuccess.classList.add('show');
+      if (window.clarity) {
+        window.clarity('event', 'domain_offer');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Send Offer';
       alert('Something went wrong. Please try again.');
     }
   });
