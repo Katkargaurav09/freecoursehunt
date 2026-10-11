@@ -416,6 +416,36 @@
   .demo-prompt { color: var(--accent); }
   .demo-faint { color: rgba(255,255,255,0.5); }
 
+      /* Top For Sale bar */
+  .sale-bar {
+    position: relative;
+    z-index: 20;
+    display: block;
+    text-align: center;
+    padding: 10px 16px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .sale-bar:hover {
+    background: var(--accent);
+  }
+
+  .sale-bar strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .sale-bar:hover strong {
+    color: var(--bg);
+  }
+
   /* For Sale section */
   .sale-section {
     margin-top: 80px;
@@ -593,7 +623,9 @@
 </style>
 </head>
 <body>
-
+<a href="#for-sale" class="sale-bar">
+  <strong>●</strong> This domain is for sale — Make an offer →
+</a>
 <nav class="nav">
   <div class="logo">
     <div class="logo-mark">F</div>
